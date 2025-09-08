@@ -547,7 +547,7 @@ async def pdf_watermark_button(client, callback_query):
 async def handle_quality(client, callback_query):
     user_id = callback_query.from_user.id
     keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back to Settings", callback_data="setttings")]])
-    editable = await callback_query.message.edit("__**Enter resolution or Video Quality (`144`, `240`, `360`, `720`, `720`, `1080`) or Send /d**__", reply_markup=keyboard)
+    editable = await callback_query.message.edit("__**Enter resolution or Video Quality (`144`, `240`, `360`, `480`, `720`, `1080`) or Send /d**__", reply_markup=keyboard)
     input_msg = await bot.listen(editable.chat.id)
     try:
         if input_msg.text.lower() == "144":
@@ -565,10 +565,10 @@ async def handle_quality(client, callback_query):
             globals.quality = f"{globals.raw_text2}p"
             globals.res = '640x360'
             await editable.edit(f"✅ Video Quality set {globals.quality} !", reply_markup=keyboard)
-        elif input_msg.text.lower() == "720":
-            globals.raw_text2 = '720'
+        elif input_msg.text.lower() == "480":
+            globals.raw_text2 = '480'
             globals.quality = f"{globals.raw_text2}p"
-            globals.res = '854x720'
+            globals.res = '854x480'
             await editable.edit(f"✅ Video Quality set {globals.quality} !", reply_markup=keyboard)
         elif input_msg.text.lower() == "720":
             globals.raw_text2 = '720'
@@ -583,7 +583,7 @@ async def handle_quality(client, callback_query):
         else:
             globals.raw_text2 = '720'
             globals.quality = f"{globals.raw_text2}p"
-            globals.res = '854x720'
+            globals.res = '1280x720'
             await editable.edit(f"✅ Video Quality set {globals.quality} as Default !", reply_markup=keyboard)
             
     except Exception as e:
@@ -631,7 +631,7 @@ async def credit(client, callback_query):
             globals.vidwatermark = '/d'
             globals.raw_text2 = '720'
             globals.quality = '720p'
-            globals.res = '854x720'
+            globals.res = '1280x720'
             globals.topic = '/d'
             await editable.edit(f"✅ Settings reset as default !", reply_markup=keyboard)
 
