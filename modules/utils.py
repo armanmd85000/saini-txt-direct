@@ -2,7 +2,7 @@ import random #NIKHIL SAINI BOTS
 import time #NIKHIL SAINI BOTS
 import math #NIKHIL SAINI BOTS
 import os #NIKHIL SAINI BOTS
-from vars import CREDIT #NIKHIL SAINI BOTS
+from modules.vars import CREDIT #NIKHIL SAINI BOTS
 from pyrogram.errors import FloodWait #NIKHIL SAINI BOTS
 from datetime import datetime,timedelta #NIKHIL SAINI BOTS
 
@@ -104,3 +104,4 @@ async def progress_bar(current, total, reply, start): #NIKHIL SAINI BOTS
                 await reply.edit(f'<blockquote>`╭──⌯═════𝐁𝐨𝐭 𝐒𝐭𝐚𝐭𝐢𝐜𝐬══════⌯──╮\n├⚡ {progress_bar}\n├⚙️ Progress ➤ | {perc} |\n├🚀 Speed ➤ | {sp} |\n├📟 Processed ➤ | {cur} |\n├🧲 Size ➤ | {tot} |\n├🕑 ETA ➤ | {eta} |\n╰─═══✨🦋{CREDIT}🦋✨═══─╯`</blockquote>') 
             except FloodWait as e: #NIKHIL SAINI BOTS
                 time.sleep(e.x) #NIKHIL SAINI BOTS 
+
