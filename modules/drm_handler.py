@@ -16,7 +16,7 @@ import cloudscraper
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64encode, b64decode
-from logs import logging
+from modules.logs import logging
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 from subprocess import getstatusoutput
