@@ -6,7 +6,7 @@ from pyrogram.errors import FloodWait
 from pyrogram.types import Message
 
 from vars import OWNER, AUTH_USERS, TXT_SOURCE_CHANNEL, UPLOAD_DEST
-from . import db
+from modules import db
 
 def register_range_handlers(bot: Client):
     db.init_db()
