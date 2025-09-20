@@ -8,32 +8,42 @@ import asyncio
 import requests
 import subprocess
 import random
+
 from pyromod import listen
-from pyrogram import Client, filters, idle  # NEW: idle
+from pyrogram import Client, filters, idle
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMediaPhoto
+
+# Package-qualified imports for reliability in Heroku (-m execution)
 from modules.range_uploader import register_range_handlers  # NEW
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
-import globals
-from logs import logging
-from html_handler import register_html_handlers
-from drm_handler import register_drm_handlers
-from text_handler import register_text_handlers
-from features import register_feature_handlers
-from upgrade import register_upgrade_handlers
-from commands import register_commands_handlers
-from settings import register_settings_handlers
-from broadcast import register_broadcast_handlers
-from youtube_handler import register_youtube_handlers
-from authorisation import register_authorisation_handlers
-from vars import API_ID, API_HASH, BOT_TOKEN, OWNER, CREDIT, AUTH_USERS, TOTAL_USERS, cookies_file_path
+from modules import globals  # fixed: import as package
+from modules.logs import logging
+from modules.html_handler import register_html_handlers
+from modules.drm_handler import register_drm_handlers
+from modules.text_handler import register_text_handlers
+from modules.features import register_feature_handlers
+from modules.upgrade import register_upgrade_handlers
+from modules.commands import register_commands_handlers
+from modules.settings import register_settings_handlers
+from modules.broadcast import register_broadcast_handlers
+from modules.youtube_handler import register_youtube_handlers
+from modules.authorisation import register_authorisation_handlers
+from modules.vars import (
+    API_ID,
+    API_HASH,
+    BOT_TOKEN,
+    OWNER,
+    CREDIT,
+    AUTH_USERS,
+    TOTAL_USERS,
+    cookies_file_path,
+)
 
 # NEW: for startup resume
 from modules import db  # ensure modules/db.py exists per earlier instructions
-import modules.range_uploader as range_uploader     # to access _process_job_loop
+import modules.range_uploader as range_uploader  # to access _process_job_loop
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 # Initialize the bot
 bot = Client(
     "bot",
@@ -42,13 +52,14 @@ bot = Client(
     bot_token=BOT_TOKEN
 )
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✨ Commands", callback_data="cmd_command")],
-            [InlineKeyboardButton("💎 Features", callback_data="feat_command"), InlineKeyboardButton("⚙️ Settings", callback_data="setttings")],
-            [InlineKeyboardButton("💳 Plans", callback_data="upgrade_command")],
-            [InlineKeyboardButton(text="📞 Contact", url=f"tg://openmessage?user_id={OWNER}"), InlineKeyboardButton(text="🛠️ Repo", url="https://github.com/nikhilsainiop/saini-txt-direct")],
-        ])
+    [InlineKeyboardButton("✨ Commands", callback_data="cmd_command")],
+    [InlineKeyboardButton("💎 Features", callback_data="feat_command"),
+     InlineKeyboardButton("⚙️ Settings", callback_data="setttings")],
+    [InlineKeyboardButton("💳 Plans", callback_data="upgrade_command")],
+    [InlineKeyboardButton(text="📞 Contact", url=f"tg://openmessage?user_id={OWNER}"),
+     InlineKeyboardButton(text="🛠️ Repo", url="https://github.com/nikhilsainiop/saini-txt-direct")],
+])
 
 @bot.on_message(filters.command("start"))
 async def start(bot, m: Message):
@@ -79,35 +90,30 @@ async def start(bot, m: Message):
         reply_markup=keyboard
     )
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_callback_query(filters.regex("back_to_main_menu"))
 async def back_to_main_menu(client, callback_query):
     user_id = callback_query.from_user.id
     first_name = callback_query.from_user.first_name
     caption = f"✨ **Welcome [{first_name}](tg://user?id={user_id}) in My uploader bot**"
-
     await callback_query.message.edit_media(
-      InputMediaPhoto(
-        media="https://envs.sh/GVI.jpg",
-        caption=caption
-      ),
-      reply_markup=keyboard
+        InputMediaPhoto(
+            media="https://envs.sh/GVI.jpg",
+            caption=caption
+        ),
+        reply_markup=keyboard
     )
     await callback_query.answer()
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_message(filters.command(["id"]))
 async def id_command(client, message: Message):
     keyboard_inline = InlineKeyboardMarkup([[InlineKeyboardButton(text="Send to Owner", url=f"tg://openmessage?user_id={OWNER}")]])
     chat_id = message.chat.id
     text = f"<blockquote expandable><b>The ID of this chat id is:</b></blockquote>\n`{chat_id}`"
-
     if str(chat_id).startswith("-100"):
         await message.reply_text(text)
     else:
         await message.reply_text(text, reply_markup=keyboard_inline)
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_message(filters.private & filters.command(["info"]))
 async def info(bot: Client, update: Message):
     keyboard_inline = InlineKeyboardMarkup([[InlineKeyboardButton(text="📞 Contact", url=f"tg://openmessage?user_id={OWNER}")]])
@@ -127,7 +133,6 @@ async def info(bot: Client, update: Message):
         reply_markup=keyboard_inline
     )
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_message(filters.command(["logs"]))
 async def send_logs(client: Client, m: Message):
     try:
@@ -138,7 +143,6 @@ async def send_logs(client: Client, m: Message):
     except Exception as e:
         await m.reply_text(f"**Error sending logs:**\n<blockquote>{e}</blockquote>")
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_message(filters.command(["reset"]))
 async def restart_handler(_, m):
     if m.chat.id != OWNER:
@@ -147,7 +151,6 @@ async def restart_handler(_, m):
         await m.reply_text("𝐁𝐨𝐭 𝐢𝐬 𝐑𝐞𝐬𝐞𝐭𝐢𝐧𝐠...", True)
         os.execl(sys.executable, sys.executable, *sys.argv)
 
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_message(filters.command("stop") & filters.private)
 async def cancel_handler(client: Client, m: Message):
     if m.chat.id not in AUTH_USERS:
@@ -169,7 +172,7 @@ async def cancel_handler(client: Client, m: Message):
         else:
             await m.reply_text("**⚡ No active process to cancel.**")
 
-#=================================================================
+# Register existing handlers
 register_text_handlers(bot)
 register_html_handlers(bot)
 register_feature_handlers(bot)
@@ -181,7 +184,7 @@ register_youtube_handlers(bot)
 register_authorisation_handlers(bot)
 register_drm_handlers(bot)
 register_range_handlers(bot)  # NEW
-#==================================================================
+
 def notify_owner():
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {
