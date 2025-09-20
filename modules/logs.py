@@ -1,4 +1,4 @@
-# logs.py
+# modules/logs.py
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -10,13 +10,18 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s [%(filename)s:%(lineno)d]",
     datefmt="%d-%b-%y %H:%M:%S",
     handlers=[
-        RotatingFileHandler("logs.txt", maxBytes=50000000, backupCount=10),
+        RotatingFileHandler("logs.txt", maxBytes=50_000_000, backupCount=10),
         logging.StreamHandler(),
     ],
 )
+
+# Reduce Pyrogram noise
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
-# Initialize logger
-logger = logging.getLogger()
+# Keep a named logger if you ever need it
+logger = logging.getLogger(__name__)
 
-
+# Provide a simple alias so other modules can import `logging` directly:
+# from modules.logs import logging
+# and call logging.info(...), logging.error(...), etc.
+# (They will use the configured root handlers above.)
