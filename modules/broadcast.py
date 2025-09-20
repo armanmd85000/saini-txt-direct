@@ -1,7 +1,7 @@
 import os
 import requests
 import subprocess
-from vars import OWNER, CREDIT, AUTH_USERS, TOTAL_USERS
+from modules.vars import OWNER, CREDIT, AUTH_USERS, TOTAL_USERS
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
