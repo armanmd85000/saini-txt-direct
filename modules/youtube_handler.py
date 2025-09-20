@@ -8,7 +8,7 @@ from pyromod import listen
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.errors import FloodWait
-from vars import CREDIT, cookies_file_path, AUTH_USERS
+from modules.vars import CREDIT, cookies_file_path, AUTH_USERS
 import globals
 
 def register_youtube_handlers(bot):
