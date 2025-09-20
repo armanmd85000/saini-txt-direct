@@ -1,5 +1,4 @@
-from vars import OWNER, CREDIT
-
+from modules.vars import OWNER, CREDIT  # fixed to package-qualified import
 processing_request = False
 cancel_requested = False
 caption = '/cc1'
