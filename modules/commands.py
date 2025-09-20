@@ -3,7 +3,7 @@ import re
 import sys
 import json
 import time
-from vars import CREDIT
+from modules.vars import CREDIT
 from pyromod import listen
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, PeerIdInvalid, UserIsBlocked, InputUserDeactivated
