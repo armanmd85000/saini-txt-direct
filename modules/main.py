@@ -13,6 +13,7 @@ from pyrogram import Client, filters
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMediaPhoto
+from range_uploader import register_range_handlers  # NEW
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 import globals
 from logs import logging
@@ -180,6 +181,7 @@ register_broadcast_handlers(bot)
 register_youtube_handlers(bot)
 register_authorisation_handlers(bot)
 register_drm_handlers(bot)
+register_range_handlers(bot)  # NEW
 #==================================================================
 
 def notify_owner():
