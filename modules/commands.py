@@ -58,4 +58,47 @@ def register_commands_handlers(bot: Client):
             f"➥ /cookies – Update YT Cookies\n"
             f"➥ /id – Get Chat/User ID\n"
             f"➥ /info – User Details\n"
-            f"➥ /logs – View Bot
+            f"➥ /logs – View Bot Activity\n"
+            f"▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n"
+            f"💡 𝗡𝗼𝘁𝗲:\n\n"
+            f"• Send any link for auto-extraction\n"
+            f"• Send direct .txt file for auto-extraction\n"
+            f"• Supports batch processing\n\n"
+            f"╭────────⊰◆⊱────────╮\n"
+            f" ➠ 𝐌𝐚𝐝𝐞 𝐁𝐲 : {CREDIT} 💻\n"
+            f"╰────────⊰◆⊱────────╯\n"
+        )
+        await callback_query.message.edit_media(
+            InputMediaPhoto(
+                media="https://tinypic.host/images/2025/07/14/file_00000000fc2461fbbdd6bc500cecbff8_conversation_id6874702c-9760-800e-b0bf-8e0bcf8a3833message_id964012ce-7ef5-4ad4-88e0-1c41ed240c03-1-1.jpg",
+                caption=caption
+            ),
+            reply_markup=keyboard
+        )
+
+    # Owner commands page
+    @bot.on_callback_query(filters.regex("owner_command"))
+    async def help_button_owner(client, callback_query):
+        user_id = callback_query.from_user.id
+        first_name = callback_query.from_user.first_name
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Back to Commands", callback_data="cmd_command")]])
+        caption = (
+            f"👤 𝐁𝐨𝐭 𝐎𝐰𝐧𝐞𝐫 𝐂𝐨𝐦𝐦𝐚𝐧𝐝𝐬\n\n"
+            f"➥ /addauth xxxx – Add User ID\n"
+            f"➥ /rmauth xxxx – Remove User ID\n"
+            f"➥ /users – Total User List\n"
+            f"➥ /broadcast – For Broadcasting\n"
+            f"➥ /broadusers – All Broadcasting Users\n"
+            f"➥ /reset – Reset Bot\n"
+            f"▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰\n"
+            f"╭────────⊰◆⊱────────╮\n"
+            f" ➠ 𝐌𝐚𝐝𝐞 𝐁𝐲 : {CREDIT} 💻\n"
+            f"╰────────⊰◆⊱────────╯\n"
+        )
+        await callback_query.message.edit_media(
+            InputMediaPhoto(
+                media="https://tinypic.host/images/2025/07/14/file_00000000fc2461fbbdd6bc500cecbff8_conversation_id6874702c-9760-800e-b0bf-8e0bcf8a3833message_id964012ce-7ef5-4ad4-88e0-1c41ed240c03-1-1.jpg",
+                caption=caption
+            ),
+            reply_markup=keyboard
+        )
