@@ -9,7 +9,7 @@ import requests
 import subprocess
 import random
 from pyromod import listen
-from pyrogram import Client, filters
+from pyrogram import Client, filters, idle  # NEW: idle
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMediaPhoto
@@ -28,8 +28,12 @@ from broadcast import register_broadcast_handlers
 from youtube_handler import register_youtube_handlers
 from authorisation import register_authorisation_handlers
 from vars import API_ID, API_HASH, BOT_TOKEN, OWNER, CREDIT, AUTH_USERS, TOTAL_USERS, cookies_file_path
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 
+# NEW: for startup resume
+from modules import db  # ensure modules/db.py exists per earlier instructions
+import range_uploader     # to access _process_job_loop
+
+# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 # Initialize the bot
 bot = Client(
     "bot",
@@ -44,7 +48,7 @@ keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("💎 Features", callback_data="feat_command"), InlineKeyboardButton("⚙️ Settings", callback_data="setttings")],
             [InlineKeyboardButton("💳 Plans", callback_data="upgrade_command")],
             [InlineKeyboardButton(text="📞 Contact", url=f"tg://openmessage?user_id={OWNER}"), InlineKeyboardButton(text="🛠️ Repo", url="https://github.com/nikhilsainiop/saini-txt-direct")],
-        ])      
+        ])
 
 @bot.on_message(filters.command("start"))
 async def start(bot, m: Message):
@@ -74,14 +78,14 @@ async def start(bot, m: Message):
         caption=caption,
         reply_markup=keyboard
     )
-    
+
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_callback_query(filters.regex("back_to_main_menu"))
 async def back_to_main_menu(client, callback_query):
     user_id = callback_query.from_user.id
     first_name = callback_query.from_user.first_name
     caption = f"✨ **Welcome [{first_name}](tg://user?id={user_id}) in My uploader bot**"
-    
+
     await callback_query.message.edit_media(
       InputMediaPhoto(
         media="https://envs.sh/GVI.jpg",
@@ -89,27 +93,24 @@ async def back_to_main_menu(client, callback_query):
       ),
       reply_markup=keyboard
     )
-    await callback_query.answer()  
+    await callback_query.answer()
 
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
-# .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
-
 @bot.on_message(filters.command(["id"]))
 async def id_command(client, message: Message):
-    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text="Send to Owner", url=f"tg://openmessage?user_id={OWNER}")]])
+    keyboard_inline = InlineKeyboardMarkup([[InlineKeyboardButton(text="Send to Owner", url=f"tg://openmessage?user_id={OWNER}")]])
     chat_id = message.chat.id
     text = f"<blockquote expandable><b>The ID of this chat id is:</b></blockquote>\n`{chat_id}`"
-    
+
     if str(chat_id).startswith("-100"):
         await message.reply_text(text)
     else:
-        await message.reply_text(text, reply_markup=keyboard)
+        await message.reply_text(text, reply_markup=keyboard_inline)
 
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
-
 @bot.on_message(filters.private & filters.command(["info"]))
 async def info(bot: Client, update: Message):
-    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(text="📞 Contact", url=f"tg://openmessage?user_id={OWNER}")]])
+    keyboard_inline = InlineKeyboardMarkup([[InlineKeyboardButton(text="📞 Contact", url=f"tg://openmessage?user_id={OWNER}")]])
     text = (
         f"╭────────────────╮\n"
         f"│✨ **Your Telegram Info**✨ \n"
@@ -119,16 +120,16 @@ async def info(bot: Client, update: Message):
         f"├🔹**TG ID :** `{update.from_user.id}`\n"
         f"├🔹**Profile :** {update.from_user.mention}\n"
         f"╰────────────────╯"
-    )    
-    await update.reply_text(        
+    )
+    await update.reply_text(
         text=text,
         disable_web_page_preview=True,
-        reply_markup=keyboard
+        reply_markup=keyboard_inline
     )
 
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 @bot.on_message(filters.command(["logs"]))
-async def send_logs(client: Client, m: Message):  # Correct parameter name
+async def send_logs(client: Client, m: Message):
     try:
         with open("logs.txt", "rb") as file:
             sent = await m.reply_text("**📤 Sending you ....**")
@@ -152,7 +153,7 @@ async def cancel_handler(client: Client, m: Message):
     if m.chat.id not in AUTH_USERS:
         print(f"User ID not in AUTH_USERS", m.chat.id)
         await bot.send_message(
-            m.chat.id, 
+            m.chat.id,
             f"<blockquote>__**Oopss! You are not a Premium member**__\n"
             f"__**PLEASE /upgrade YOUR PLAN**__\n"
             f"__**Send me your user id for authorization**__\n"
@@ -163,14 +164,12 @@ async def cancel_handler(client: Client, m: Message):
             globals.cancel_requested = True
             await m.delete()
             cancel_message = await m.reply_text("**🚦 Process cancel request received. Stopping after current process...**")
-            await asyncio.sleep(30)  # 30 second wait
+            await asyncio.sleep(30)
             await cancel_message.delete()
         else:
             await m.reply_text("**⚡ No active process to cancel.**")
 
-
 #=================================================================
-
 register_text_handlers(bot)
 register_html_handlers(bot)
 register_feature_handlers(bot)
@@ -183,7 +182,6 @@ register_authorisation_handlers(bot)
 register_drm_handlers(bot)
 register_range_handlers(bot)  # NEW
 #==================================================================
-
 def notify_owner():
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {
@@ -194,8 +192,6 @@ def notify_owner():
 
 def reset_and_set_commands():
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/setMyCommands"
-
-    # General users ke liye commands
     general_commands = [
         {"command": "start", "description": "✅ Check Alive the Bot"},
         {"command": "stop", "description": "🚫 Stop the ongoing process"},
@@ -208,7 +204,6 @@ def reset_and_set_commands():
         {"command": "t2h", "description": "🌐 .txt → .html Converter"},
         {"command": "logs", "description": "👁️ View Bot Activity"},
     ]
-    # Owner ke liye extra commands
     owner_commands = general_commands + [
         {"command": "broadcast", "description": "📢 Broadcast to All Users"},
         {"command": "broadusers", "description": "👨‍❤️‍👨 All Broadcasting Users"},
@@ -217,23 +212,43 @@ def reset_and_set_commands():
         {"command": "users", "description": "👨‍👨‍👧‍👦 All Premium Users"},
         {"command": "reset", "description": "✅ Reset the Bot"}
     ]
-
-    # General users ke liye set commands (scope default)
     requests.post(url, json={
         "commands": general_commands,
         "scope": {"type": "default"},
         "language_code": "en"
     })
-
-    # Owner ke liye set commands (scope user)
     requests.post(url, json={
         "commands": owner_commands,
-        "scope": {"type": "chat", "chat_id": OWNER},  # OWNER variable me chat id hona chahiye
+        "scope": {"type": "chat", "chat_id": OWNER},
         "language_code": "en"
     })
-    
+
+# =======================
+# NEW: Auto-resume on startup
+# =======================
+async def _startup_resume():
+    try:
+        db.init_db()
+        jobs = await db.get_incomplete_jobs()
+        resumed = 0
+        for job in jobs:
+            if job.get("status") in ("in_progress", "paused"):
+                await db.set_status(job["_id"], "in_progress")
+                asyncio.create_task(range_uploader._process_job_loop(bot, str(job["_id"])))
+                resumed += 1
+        logging.info(f"[main] Auto-resume: resumed {resumed} job(s).")
+    except Exception as e:
+        logging.warning(f"[main] Auto-resume failed: {e}")
+
+async def _runner():
+    await bot.start()
+    await _startup_resume()
+    print("[main] SAINI DRM Bot is running.")
+    await idle()
+    await bot.stop()
+
 if __name__ == "__main__":
     reset_and_set_commands()
-    notify_owner() 
-
-bot.run()
+    notify_owner()
+    # bot.run()  # replaced to hook startup resume
+    asyncio.get_event_loop().run_until_complete(_runner())
