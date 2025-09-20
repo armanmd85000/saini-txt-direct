@@ -1,5 +1,5 @@
 import os
-from vars import CREDIT, OWNER
+from modules.vars import CREDIT, OWNER
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, Message
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
