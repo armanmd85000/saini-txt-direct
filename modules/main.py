@@ -13,7 +13,7 @@ from pyrogram import Client, filters, idle  # NEW: idle
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid
 from pyrogram.types.messages_and_media import message
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, InputMediaPhoto
-from range_uploader import register_range_handlers  # NEW
+ from modules.range_uploader import register_range_handlers  # NEW
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 import globals
 from logs import logging
@@ -31,7 +31,7 @@ from vars import API_ID, API_HASH, BOT_TOKEN, OWNER, CREDIT, AUTH_USERS, TOTAL_U
 
 # NEW: for startup resume
 from modules import db  # ensure modules/db.py exists per earlier instructions
-import range_uploader     # to access _process_job_loop
+import modules.range_uploader as range_uploader     # to access _process_job_loop
 
 # .....,.....,.......,...,.......,....., .....,.....,.......,...,.......,.....,
 # Initialize the bot
