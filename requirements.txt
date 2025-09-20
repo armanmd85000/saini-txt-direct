@@ -18,7 +18,6 @@ TgCrypto==1.2.5
 urllib3==2.0.3
 websockets==11.0.3
 yt-dlp==2025.02.19
-motor
 pytz
 aiohttp
 aiofiles
@@ -50,4 +49,4 @@ google-auth-httplib2
 google-api-python-client
 ffmpeg-python
 motor==3.6.0
-pymongo==4.8.0
+pymongo==4.9.2
