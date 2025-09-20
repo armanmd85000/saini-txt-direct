@@ -3,7 +3,7 @@ import datetime
 from typing import Optional, Dict, Any
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from vars import MONGO_URI
+from modules.vars import MONGO_URI
 
 _client = None
 _db = None
