@@ -1,3 +1,5 @@
+# modules/range_uploader.py
+
 import asyncio
 from typing import Optional
 
@@ -8,6 +10,7 @@ from pyrogram.types import Message
 from modules.vars import OWNER, AUTH_USERS, TXT_SOURCE_CHANNEL, UPLOAD_DEST
 from modules import db
 
+
 def register_range_handlers(bot: Client):
     db.init_db()
 
@@ -15,8 +18,10 @@ def register_range_handlers(bot: Client):
     async def cmd_range_upload(client: Client, m: Message):
         if m.from_user is None or m.from_user.id not in AUTH_USERS:
             return await m.reply_text("**Not authorized.**")
+
         if TXT_SOURCE_CHANNEL is None or UPLOAD_DEST is None:
             return await m.reply_text("**Config missing.** Set TXT_SOURCE_CHANNEL and UPLOAD_DEST in env.")
+
         try:
             # /range_upload <start_msg_id> <end_msg_id>
             _, s, e = m.text.strip().split(maxsplit=2)
@@ -37,25 +42,28 @@ def register_range_handlers(bot: Client):
             source_channel_id=TXT_SOURCE_CHANNEL,
             dest_channel_id=UPLOAD_DEST,
             start_msg_id=start_id,
-            end_msg_id=end_id
+            end_msg_id=end_id,
         )
-        await m.reply_text(f"Job created. Starting upload {start_id}..{end_id}\nJob ID: `{job['_id']}`")
 
-        asyncio.create_task(_process_job_loop(client, job["_id"]))  # fire and forget
+        await m.reply_text(f"Job created. Starting upload {start_id}..{end_id}\nJob ID: `{job['_id']}`")
+        asyncio.create_task(_process_job_loop(client, str(job["_id"])))  # fire and forget
 
     @bot.on_message(filters.command(["range_status"]) & filters.private)
     async def cmd_range_status(client: Client, m: Message):
         if m.from_user is None or m.from_user.id not in AUTH_USERS:
             return await m.reply_text("**Not authorized.**")
+
         job = await db.get_active_job_for_owner(m.from_user.id)
         if not job:
             return await m.reply_text("No active/paused job.")
+
         cur = job.get("current_msg_id", job["start_msg_id"] - 1)
         total = job["end_msg_id"] - job["start_msg_id"] + 1
         done = max(0, cur - job["start_msg_id"] + 1)
         remain = max(0, total - done)
         status = job.get("status", "?")
         last_error = job.get("last_error", "-")
+
         await m.reply_text(
             f"Job: `{job['_id']}`\n"
             f"Range: {job['start_msg_id']}..{job['end_msg_id']}\n"
@@ -69,9 +77,11 @@ def register_range_handlers(bot: Client):
     async def cmd_range_pause(client: Client, m: Message):
         if m.from_user is None or m.from_user.id not in AUTH_USERS:
             return await m.reply_text("**Not authorized.**")
+
         job = await db.get_active_job_for_owner(m.from_user.id)
         if not job:
             return await m.reply_text("No active/paused job.")
+
         await db.set_status(job["_id"], "paused")
         await m.reply_text(f"Job `{job['_id']}` paused.")
 
@@ -79,17 +89,21 @@ def register_range_handlers(bot: Client):
     async def cmd_range_resume(client: Client, m: Message):
         if m.from_user is None or m.from_user.id not in AUTH_USERS:
             return await m.reply_text("**Not authorized.**")
+
         job = await db.get_active_job_for_owner(m.from_user.id)
         if not job:
             return await m.reply_text("No active/paused job.")
+
         await db.set_status(job["_id"], "in_progress")
         await m.reply_text(f"Resuming job `{job['_id']}`.")
-        asyncio.create_task(_process_job_loop(client, job["_id"]))
+        asyncio.create_task(_process_job_loop(client, str(job["_id"])))
+
 
 async def _process_job_loop(bot: Client, job_id: str):
     job = await db.get_job(job_id)
     if not job or job.get("status") not in ("in_progress", "paused"):
         return
+
     source = job["source_channel_id"]
     dest = job["dest_channel_id"]
     start = job["start_msg_id"]
@@ -141,7 +155,7 @@ async def _process_job_loop(bot: Client, job_id: str):
                 # create a .txt on the fly from text message
                 content = msg.text
                 fname = f"message_{next_id}.txt"
-                import os, io, tempfile
+                import os, tempfile
                 with tempfile.NamedTemporaryFile("w+", suffix=".txt", delete=False) as tf:
                     tf.write(content)
                     path = tf.name
@@ -160,6 +174,7 @@ async def _process_job_loop(bot: Client, job_id: str):
         except FloodWait as fw:
             await db.update_progress(job_id, next_id)  # persist current id before sleep
             await asyncio.sleep(fw.value)
+
         except Exception as e:
             # persist and pause so it can be resumed safely
             await db.set_status(job_id, "paused", last_error=str(e))
