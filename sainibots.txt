@@ -49,3 +49,5 @@ google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 ffmpeg-python
+motor==3.6.0
+pymongo==4.8.0
